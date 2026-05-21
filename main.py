@@ -29,12 +29,12 @@ id_cliente_inc = 1
 id_factura_inc = 1
 id_transaccion_inc = 1
 
-# --- 1. INICIO ---
+# --- INICIO ---
 @app.get("/")
 def inicio():
     return {"mensaje": "Sistema Integral ReCal Tech - FastAPI"}
 
-# --- 2. APARTADO CLIENTES (GET, POST, PUT, DELETE) ---
+# ---APARTADO CLIENTES (GET, POST, PUT, DELETE) ---
 @app.get("/clientes")
 def listar_clientes():
     return {"Clientes": lista_clientes}
@@ -66,7 +66,7 @@ def eliminar_cliente(id: int):
             return {"mensaje": "Cliente eliminado", "datos_eliminados": eliminado}
     return {"error": "No encontrado"}
 
-# --- 3. APARTADO FACTURAS (POST y GET) ---
+# ---APARTADO FACTURAS (POST y GET) ---
 @app.get("/facturas")
 def listar_facturas():
     return {"Facturas": lista_facturas}
@@ -85,7 +85,7 @@ def crear_factura(datos: Factura):
     id_factura_inc += 1
     return {"mensaje": "Factura generada", "factura": nueva_f}
 
-# --- 4. APARTADO TRANSACCIONES (POST y GET) ---
+# ---APARTADO TRANSACCIONES (POST y GET) ---
 @app.get("/transacciones")
 def listar_transacciones():
     return {"Transacciones": lista_transacciones}
