@@ -166,4 +166,4 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 
 ## 👥 Equipo
 
-Proyecto desarrollado en el programa **Tecnólogo en Análisis y Desarrollo de Software (ADSO)** — SENA, Ficha 3407184.
+Proyecto desarrollado en el programa **Tecnólogo en Análisis y Desarrollo de Software (ADSO)** — SENA, Ficha 3407184 - Joshua Nocua.
