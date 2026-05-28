@@ -83,7 +83,7 @@ def crear_factura(datos: Factura):
     nueva_f["fecha"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     lista_facturas.append(nueva_f)
     id_factura_inc += 1
-    return {"mensaje": "Factura generada", "factura": nueva_f}
+    return {"mensaje": "Factura generada", "factura": nueva_f
 
 # ---APARTADO TRANSACCIONES (POST y GET) ---
 @app.get("/transacciones")
