@@ -1,10 +1,10 @@
-# 🐍 API REST con FastAPI
+# API REST con FastAPI
 
 API REST construida con **FastAPI** que gestiona clientes, facturas y transacciones. Permite realizar operaciones CRUD completas sobre cada recurso.
 
 ---
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 | Herramienta | Descripción |
 |-------------|-------------|
@@ -16,7 +16,7 @@ API REST construida con **FastAPI** que gestiona clientes, facturas y transaccio
 
 ---
 
-## 📁 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 app/
@@ -34,7 +34,7 @@ app/
 
 ---
 
-## ⚙️ Instalación y ejecución
+## Instalación y ejecución
 
 ### 1. Clonar el repositorio
 
@@ -84,9 +84,9 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 
 ---
 
-## 📌 Endpoints disponibles
+##  Endpoints disponibles
 
-### 👤 Clientes — `/clientes`
+###  Clientes — `/clientes`
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -107,7 +107,7 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 
 ---
 
-### 🧾 Facturas — `/facturas`
+###  Facturas — `/facturas`
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -126,11 +126,11 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 }
 ```
 
-> ℹ️ El `valor_total` se calcula automáticamente sumando `valor_unitario × cantidad` de todas las transacciones asociadas a esa factura.
+> ℹ El `valor_total` se calcula automáticamente sumando `valor_unitario × cantidad` de todas las transacciones asociadas a esa factura.
 
 ---
 
-### 💳 Transacciones — `/transacciones`
+### Transacciones — `/transacciones`
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -149,11 +149,11 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 }
 ```
 
-> ⚠️ El `factura_id` debe corresponder a una factura existente, de lo contrario retorna error 404.
+>  El `factura_id` debe corresponder a una factura existente, de lo contrario retorna error 404.
 
 ---
 
-## 🔁 Flujo recomendado de uso
+##  Flujo recomendado de uso
 
 ```
 1. Crear un cliente        →  POST /clientes
@@ -164,6 +164,6 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 
 ---
 
-## 👥 Equipo
+## Equipo
 
 Proyecto desarrollado en el programa **Tecnólogo en Análisis y Desarrollo de Software (ADSO)** — SENA, Ficha 3407184 - Joshua Nocua.
