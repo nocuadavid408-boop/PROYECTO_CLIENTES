@@ -2,7 +2,7 @@
 
 API REST construida con **FastAPI** que gestiona clientes, facturas y transacciones. Permite realizar operaciones CRUD completas sobre cada recurso.
 
----
+----
 
 ## Tecnologías
 
