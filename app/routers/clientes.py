@@ -7,9 +7,9 @@ from app.database import lista_clientes, lista_facturas, lista_transacciones
 router_clientes = APIRouter()
 
 
-# ─────────────────────────────────────────
+
 #  CLIENTES
-# ─────────────────────────────────────────
+
 
 @router_clientes.get("/clientes")
 def listar_clientes():
@@ -52,9 +52,9 @@ def eliminar_cliente(id: int):
     raise HTTPException(status_code=404, detail="Cliente no encontrado")
 
 
-# ─────────────────────────────────────────
+
 #  FACTURAS
-# ─────────────────────────────────────────
+
 
 @router_clientes.get("/facturas")
 def listar_facturas():
@@ -105,9 +105,9 @@ def eliminar_factura(id: int):
     raise HTTPException(status_code=404, detail="Factura no encontrada")
 
 
-# ─────────────────────────────────────────
+
 #  TRANSACCIONES
-# ─────────────────────────────────────────
+
 
 @router_clientes.get("/transacciones")
 def listar_transacciones():
