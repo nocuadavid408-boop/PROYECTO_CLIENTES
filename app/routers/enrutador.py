@@ -126,10 +126,7 @@ def obtener_transaccion(id: int):
 def crear_transaccion(datos: TransaccionCrear):
     factura_existe = any(f.id == datos.factura_id for f in lista_facturas)
     if not factura_existe:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No existe una factura con id {datos.factura_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No existe una factura con id {datos.factura_id}")
     nueva_id = len(lista_transacciones) + 1
     transaccion = Transaccion(id=nueva_id, **datos.model_dump())
     lista_transacciones.append(transaccion)
@@ -140,10 +137,7 @@ def crear_transaccion(datos: TransaccionCrear):
 def editar_transaccion(id: int, datos: TransaccionCrear):
     factura_existe = any(f.id == datos.factura_id for f in lista_facturas)
     if not factura_existe:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No existe una factura con id {datos.factura_id}"
-        )
+        raise HTTPException(status_code=404, detail=f"No existe una factura con id {datos.factura_id}")
     for transaccion in lista_transacciones:
         if transaccion.id == id:
             transaccion.valor_unitario = datos.valor_unitario
