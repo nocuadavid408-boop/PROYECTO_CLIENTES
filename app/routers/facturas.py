@@ -26,7 +26,9 @@ def obtener_valor_total(id: int, session: Session = Depends(get_session)):
     factura = session.get(Factura, id)
     if not factura:
         raise HTTPException(status_code=404, detail="Factura no encontrada")
-    transacciones = session.exec(select(Transaccion).where(Transaccion.factura_id == id)).all()
+    transacciones = session.exec(
+        select(Transaccion).where(Transaccion.factura_id == id)
+    ).all()
     total = sum(t.valor_unitario * t.cantidad for t in transacciones)
     return {"factura_id": id, "valor_total": total}
 

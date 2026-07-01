@@ -1,5 +1,5 @@
-from typing import Optional
-from sqlmodel import SQLModel, Field
+from typing import Optional, List
+from sqlmodel import SQLModel, Field, Relationship
 
 
 class Cliente(SQLModel, table=True):
@@ -7,6 +7,8 @@ class Cliente(SQLModel, table=True):
     nombre: str
     edad: int
     descripcion: Optional[str] = None
+
+    facturas: List["Factura"] = Relationship(back_populates="cliente")
 
 
 class ClienteCrear(SQLModel):

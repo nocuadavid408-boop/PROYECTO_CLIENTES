@@ -18,6 +18,7 @@ def root():
     return {"mensaje": "API funcionando"}
 
 
+# ENRUTADORES
 app.include_router(rutas_clientes)
 app.include_router(rutas_facturas)
 app.include_router(rutas_transacciones)
