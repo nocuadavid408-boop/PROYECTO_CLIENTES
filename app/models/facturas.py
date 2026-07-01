@@ -1,29 +1,27 @@
-from pydantic import BaseModel
-from datetime import datetime
 from typing import Optional
+from datetime import datetime
+from sqlmodel import SQLModel, Field
 
 
-class TransaccionCrear(BaseModel):
+class Factura(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    fecha: datetime = Field(default_factory=datetime.now)
+    cliente_id: int
+
+
+class FacturaCrear(SQLModel):
+    fecha: datetime = Field(default_factory=datetime.now)
+    cliente_id: int
+
+
+class Transaccion(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
     valor_unitario: float
     cantidad: int
     factura_id: int
 
 
-class Transaccion(TransaccionCrear):
-    id: int
-
-
-class FacturaCrear(BaseModel):
-    fecha: datetime = datetime.now()
-    cliente_id: int
-
-
-class Factura(FacturaCrear):
-    id: int
-
-    def valor_total(self, lista_transacciones: list) -> float:
-        total = 0.0
-        for t in lista_transacciones:
-            if t.factura_id == self.id:
-                total += t.valor_unitario * t.cantidad
-        return total
+class TransaccionCrear(SQLModel):
+    valor_unitario: float
+    cantidad: int
+    factura_id: int
