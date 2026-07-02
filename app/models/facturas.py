@@ -17,6 +17,12 @@ class FacturaCrear(SQLModel):
     cliente_id: int
 
 
+class FacturaLeer(SQLModel):
+    id: int
+    fecha: datetime
+    cliente_id: int
+
+
 class Transaccion(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     valor_unitario: float
