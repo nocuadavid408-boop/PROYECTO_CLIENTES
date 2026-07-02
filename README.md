@@ -1,10 +1,10 @@
-# 🐍 API REST con FastAPI — Proyecto Clientes
+# API REST con FastAPI — Proyecto Clientes
 
 API REST construida con **FastAPI** y **SQLModel** que gestiona clientes, facturas y transacciones. Permite realizar operaciones CRUD completas sobre cada recurso, con persistencia en base de datos SQLite y relaciones entre tablas.
 
 ---
 
-## 🛠️ Tecnologías
+##  Tecnologías
 
 | Herramienta | Descripción |
 |-------------|-------------|
@@ -17,7 +17,7 @@ API REST construida con **FastAPI** y **SQLModel** que gestiona clientes, factur
 
 ---
 
-## 📁 Estructura del proyecto
+##  Estructura del proyecto
 
 ```
 p.y.t.h.o.n/
@@ -41,7 +41,7 @@ p.y.t.h.o.n/
 
 ---
 
-## ⚙️ Instalación y ejecución
+##  Instalación y ejecución
 
 ### 1. Clonar el repositorio
 
@@ -86,9 +86,9 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 
 ---
 
-## 📌 Endpoints disponibles
+##  Endpoints disponibles
 
-### 👤 Clientes — `/clientes`
+###  Clientes — `/clientes`
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -109,7 +109,7 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 
 ---
 
-### 🧾 Facturas — `/facturas`
+###  Facturas — `/facturas`
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -129,7 +129,7 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 
 ---
 
-### 💳 Transacciones — `/transacciones`
+### Transacciones — `/transacciones`
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
@@ -150,7 +150,7 @@ Documentación interactiva (Swagger UI): **http://127.0.0.1:8000/docs**
 
 ---
 
-## 🗄️ Relaciones de base de datos
+## Relaciones de base de datos
 
 ```
 Cliente (1) ──── (N) Factura (1) ──── (N) Transaccion
@@ -162,7 +162,7 @@ Cliente (1) ──── (N) Factura (1) ──── (N) Transaccion
 
 ---
 
-## 🔁 Flujo recomendado de uso
+## Flujo recomendado de uso
 
 ```
 1. Crear un cliente        →  POST /clientes
@@ -173,7 +173,7 @@ Cliente (1) ──── (N) Factura (1) ──── (N) Transaccion
 
 ---
 
-## 🗂️ Historial de versiones (commits)
+## Historial de versiones (commits)
 
 | Versión | Commit | Descripción |
 |---------|--------|-------------|
@@ -186,7 +186,6 @@ Cliente (1) ──── (N) Factura (1) ──── (N) Transaccion
 
 ---
 
-## 👨‍💻 Autor
 
 **Joshua David Nocua Carrillo**
 Tecnólogo en Análisis y Desarrollo de Software (ADSO)
