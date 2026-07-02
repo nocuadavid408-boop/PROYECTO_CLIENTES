@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from app.models.clientes import Cliente, ClienteCrear
 from app.conexion_bd import get_session
 
-rutas_clientes = APIRouter()
+rutas_clientes = APIRouter(tags=["Clientes"])
 
 
 @rutas_clientes.get("/clientes")

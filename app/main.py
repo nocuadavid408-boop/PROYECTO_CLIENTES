@@ -5,7 +5,11 @@ from app.routers.clientes import rutas_clientes
 from app.routers.facturas import rutas_facturas
 from app.routers.transacciones import rutas_transacciones
 
-app = FastAPI()
+app = FastAPI(
+    title="API Gestión de Facturas",
+    description="API REST para gestionar clientes, facturas y transacciones",
+    version="1.0.0"
+)
 
 
 @app.on_event("startup")
@@ -13,7 +17,7 @@ def on_startup():
     crear_tablas()
 
 
-@app.get("/")
+@app.get("/", tags=["default"])
 def root():
     return {"mensaje": "API funcionando"}
 

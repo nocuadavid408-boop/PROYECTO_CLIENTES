@@ -5,7 +5,7 @@ from sqlmodel import Session, select
 from app.models.facturas import Factura, FacturaCrear, Transaccion
 from app.conexion_bd import get_session
 
-rutas_facturas = APIRouter()
+rutas_facturas = APIRouter(tags=["Facturas"])
 
 
 @rutas_facturas.get("/facturas")
