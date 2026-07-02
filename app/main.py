@@ -26,3 +26,5 @@ def root():
 app.include_router(rutas_clientes)
 app.include_router(rutas_facturas)
 app.include_router(rutas_transacciones)
+
+#--
