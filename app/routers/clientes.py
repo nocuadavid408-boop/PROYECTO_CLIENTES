@@ -1,52 +1,157 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 
-from app.models.clientes import Cliente, ClienteCrear
-from app.conexion_bd import get_session
+from app.database import get_session
+from app.models.clientes import (
+    Cliente,
+    ClienteCrear,
+    ClienteActualizar,
+    ClientePublico,
+)
 
-rutas_clientes = APIRouter(tags=["Clientes"])
+router_clientes = APIRouter(
+    prefix="/clientes",
+    tags=["Clientes"]
+)
+
+# LISTAR CLIENTES
+@router_clientes.get(
+    "/",
+    response_model=list[ClientePublico]
+)
+async def listar_clientes(
+    session: Session = Depends(get_session)
+):
+    return session.exec(
+        select(Cliente)
+    ).all()
 
 
-@rutas_clientes.get("/clientes", tags=["Clientes"])
-def listar_clientes(session: Session = Depends(get_session)):
-    return session.exec(select(Cliente)).all()
+# OBTENER CLIENTE
+@router_clientes.get(
+    "/{id}",
+    response_model=ClientePublico,
+    responses={
+        404: {
+            "description":
+            "Cliente no encontrado"
+        }
+    }
+)
+async def obtener_cliente(
+    id: int,
+    session: Session = Depends(get_session)
+):
+    cliente = session.get(
+        Cliente,
+        id
+    )
 
-
-@rutas_clientes.get("/clientes/{id}",tags=["Clientes"])
-def obtener_cliente(id: int, session: Session = Depends(get_session)):
-    cliente = session.get(Cliente, id)
     if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cliente no encontrado"
+        )
+
     return cliente
 
 
-@rutas_clientes.post("/clientes",tags=["Clientes"])
-def crear_cliente(datos: ClienteCrear, session: Session = Depends(get_session)):
-    cliente = Cliente(**datos.model_dump())
+# CREAR CLIENTE
+@router_clientes.post(
+    "/",
+    response_model=ClientePublico,
+    status_code=status.HTTP_201_CREATED
+)
+async def crear_cliente(
+    datos: ClienteCrear,
+    session: Session = Depends(get_session)
+):
+
+    cliente = Cliente.model_validate(
+        datos
+    )
+
     session.add(cliente)
     session.commit()
     session.refresh(cliente)
-    return {"mensaje": "Cliente creado correctamente", "cliente": cliente}
+
+    return cliente
 
 
-@rutas_clientes.put("/clientes/{id}", tags=["Clientes"])
-def editar_cliente(id: int, datos: ClienteCrear, session: Session = Depends(get_session)):
-    cliente = session.get(Cliente, id)
+# ACTUALIZAR CLIENTE
+@router_clientes.put(
+    "/{id}",
+    response_model=ClientePublico,
+    responses={
+        404: {
+            "description":
+            "Cliente no encontrado"
+        }
+    }
+)
+async def actualizar_cliente(
+    id: int,
+    datos: ClienteActualizar,
+    session: Session = Depends(get_session)
+):
+
+    cliente = session.get(
+        Cliente,
+        id
+    )
+
     if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
-    cliente.nombre = datos.nombre
-    cliente.edad = datos.edad
-    cliente.descripcion = datos.descripcion
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cliente no encontrado"
+        )
+
+    if datos.nombre is not None:
+        cliente.nombre = datos.nombre
+
+    if datos.edad is not None:
+        cliente.edad = datos.edad
+
+    if datos.descripcion is not None:
+        cliente.descripcion = datos.descripcion
+
+    session.add(cliente)
     session.commit()
     session.refresh(cliente)
-    return {"mensaje": "Cliente actualizado", "cliente": cliente}
+
+    return cliente
 
 
-@rutas_clientes.delete("/clientes/{id}", tags=["Clientes"])
-def eliminar_cliente(id: int, session: Session = Depends(get_session)):
-    cliente = session.get(Cliente, id)
+# ELIMINAR CLIENTE
+@router_clientes.delete(
+    "/{id}",
+    responses={
+        404: {
+            "description":
+            "Cliente no encontrado"
+        }
+    }
+)
+async def eliminar_cliente(
+    id: int,
+    session: Session = Depends(get_session)
+):
+
+    cliente = session.get(
+        Cliente,
+        id
+    )
+
     if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cliente no encontrado"
+        )
+
     session.delete(cliente)
     session.commit()
-    return {"mensaje": "Cliente eliminado"}
+
+    return {
+        "mensaje":
+        "Cliente eliminado correctamente"
+    }

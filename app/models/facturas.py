@@ -1,41 +1,75 @@
-from typing import Optional, List
+from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 
-
-class Factura(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    fecha: datetime = Field(default_factory=datetime.now)
-    cliente_id: Optional[int] = Field(default=None, foreign_key="cliente.id")
-
-    cliente: Optional["Cliente"] = Relationship(back_populates="facturas")
-    transacciones: List["Transaccion"] = Relationship(back_populates="factura")
+if TYPE_CHECKING:
+    from app.models.clientes import Cliente
+    from app.models.transacciones import Transaccion
 
 
-class FacturaCrear(SQLModel):
-    fecha: datetime = Field(default_factory=datetime.now)
-    cliente_id: int
+# MODELO BASE
+class FacturaBase(SQLModel):
+    cliente_id: int = Field(
+        foreign_key="clientes.id"
+    )
 
 
-class FacturaLeer(SQLModel):
+# CREAR FACTURA
+class FacturaCrear(FacturaBase):
+    pass
+
+
+# ACTUALIZAR FACTURA
+class FacturaActualizar(SQLModel):
+    pass
+
+
+# TABLA FACTURAS
+class Factura(FacturaBase, table=True):
+    __tablename__ = "facturas"
+
+    id: Optional[int] = Field(
+        default=None,
+        primary_key=True
+    )
+
+    fecha: datetime = Field(
+        default_factory=datetime.now
+    )
+
+    # Relación con cliente
+    cliente: "Cliente" = Relationship(
+        back_populates="facturas"
+    )
+
+    # Relación con transacciones
+    transacciones: list["Transaccion"] = Relationship(
+        back_populates="factura"
+    )
+
+    # Valor total de la factura
+    @property
+    def valor_total(self):
+        return sum(
+            t.valor_unitario * t.cantidad
+            for t in self.transacciones
+        )
+
+
+# RESPUESTA SIMPLE
+class FacturaPublica(SQLModel):
     id: int
     fecha: datetime
     cliente_id: int
 
 
-class Transaccion(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    valor_unitario: float
-    cantidad: int
-    factura_id: Optional[int] = Field(default=None, foreign_key="factura.id")
+# FACTURA COMPLETA
+class FacturaDetalle(SQLModel):
+    id: int
+    fecha: datetime
 
-    factura: Optional["Factura"] = Relationship(back_populates="transacciones")
+    cliente: dict
 
+    transacciones: list
 
-class TransaccionCrear(SQLModel):
-    valor_unitario: float
-    cantidad: int
-    factura_id: int
-
-
-from app.models.clientes import Cliente
+    valor_total: float
