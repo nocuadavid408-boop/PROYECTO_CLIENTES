@@ -1,35 +1,50 @@
-from typing import Optional, List
-from datetime import datetime
+from pydantic import computed_field
 from sqlmodel import SQLModel, Field, Relationship
+from .cliente import Cliente, ClienteLeer
+from .transacciones import Transaccion
+from datetime import datetime
 
 
-class Factura(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+class FacturaBase(SQLModel):
     fecha: datetime = Field(default_factory=datetime.now)
-    cliente_id: Optional[int] = Field(default=None, foreign_key="cliente.id")
-
-    cliente: Optional["Cliente"] = Relationship(back_populates="facturas")
-    transacciones: List["Transaccion"] = Relationship(back_populates="factura")
 
 
-class FacturaCrear(SQLModel):
-    fecha: datetime = Field(default_factory=datetime.now)
-    cliente_id: int
+class CrearFactura(FacturaBase):
+    pass
 
 
-class Transaccion(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    valor_unitario: float
-    cantidad: int
-    factura_id: Optional[int] = Field(default=None, foreign_key="factura.id")
-
-    factura: Optional["Factura"] = Relationship(back_populates="transacciones")
+class ActualizarFactura(FacturaBase):
+    pass
 
 
-class TransaccionCrear(SQLModel):
-    valor_unitario: float
-    cantidad: int
-    factura_id: int
+class Factura(FacturaBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    cliente_id: int = Field(default=None, foreign_key="cliente.id")
+
+    cliente: Cliente = Relationship(back_populates="facturas")
+    transacciones: list["Transaccion"] = Relationship(back_populates="factura")
 
 
-from app.models.clientes import Cliente
+class FacturaLeer(FacturaBase):
+    id: int
+    cliente: ClienteLeer | None = None
+
+    @computed_field
+    @property
+    def valor_total(self) -> float:
+        transacciones = getattr(self, "transacciones", None)
+
+        if not transacciones:
+            return 0.0
+
+        total_factura = 0.0
+        for transaccion in transacciones:
+            total_factura += (
+                transaccion.valor_unitario * transaccion.cantidad
+            )
+
+        return total_factura
+
+
+class FacturaLeerCompuesta(FacturaLeer):
+    transacciones: list["Transaccion"] = []

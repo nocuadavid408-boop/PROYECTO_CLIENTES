@@ -1,64 +1,100 @@
-# rutas o endpoints
-from fastapi import APIRouter, HTTPException, Depends
-from sqlmodel import Session, select
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlmodel import select
+from ..database import Sesion_dependencia
+from ..models.facturas import (
+    Factura,
+    CrearFactura,
+    FacturaLeer,
+    FacturaLeerCompuesta,
+    ActualizarFactura
+)
+from ..models.cliente import Cliente
 
-from app.models.facturas import Factura, FacturaCrear, Transaccion
-from app.conexion_bd import get_session
-
-rutas_facturas = APIRouter(tags=["Facturas"])
-
-
-@rutas_facturas.get("/facturas")
-def listar_facturas(session: Session = Depends(get_session)):
-    return session.exec(select(Factura)).all()
-
-
-@rutas_facturas.get("/facturas/{id}")
-def obtener_factura(id: int, session: Session = Depends(get_session)):
-    factura = session.get(Factura, id)
-    if not factura:
-        raise HTTPException(status_code=404, detail="Factura no encontrada")
-    return factura
+enrutador_facturas = APIRouter()
 
 
-@rutas_facturas.get("/facturas/{id}/valor_total")
-def obtener_valor_total(id: int, session: Session = Depends(get_session)):
-    factura = session.get(Factura, id)
-    if not factura:
-        raise HTTPException(status_code=404, detail="Factura no encontrada")
-    transacciones = session.exec(
-        select(Transaccion).where(Transaccion.factura_id == id)
-    ).all()
-    total = sum(t.valor_unitario * t.cantidad for t in transacciones)
-    return {"factura_id": id, "valor_total": total}
+@enrutador_facturas.get("/facturas", response_model=list[FacturaLeerCompuesta])
+async def listar_facturas(sesion: Sesion_dependencia):
+    consulta = select(Factura)
+    lista_facturas = sesion.exec(consulta).all()
+    return lista_facturas
 
 
-@rutas_facturas.post("/facturas")
-def crear_factura(datos: FacturaCrear, session: Session = Depends(get_session)):
-    factura = Factura(**datos.model_dump())
-    session.add(factura)
-    session.commit()
-    session.refresh(factura)
-    return {"mensaje": "Factura creada", "factura": factura}
+@enrutador_facturas.get("/facturas/{factura_id}", response_model=FacturaLeerCompuesta)
+async def obtener_factura_por_id(factura_id: int, sesion: Sesion_dependencia):
+    factura_bd = sesion.get(Factura, factura_id)
+
+    if not factura_bd:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe la factura"
+        )
+
+    return factura_bd
 
 
-@rutas_facturas.put("/facturas/{id}")
-def editar_factura(id: int, datos: FacturaCrear, session: Session = Depends(get_session)):
-    factura = session.get(Factura, id)
-    if not factura:
-        raise HTTPException(status_code=404, detail="Factura no encontrada")
-    factura.fecha = datos.fecha
-    factura.cliente_id = datos.cliente_id
-    session.commit()
-    session.refresh(factura)
-    return {"mensaje": "Factura actualizada", "factura": factura}
+@enrutador_facturas.post("/facturas/{cliente_id}", response_model=FacturaLeer)
+async def crear_factura(
+    cliente_id: int,
+    datos_factura: CrearFactura,
+    sesion: Sesion_dependencia
+):
+    cliente_encontrado = sesion.get(Cliente, cliente_id)
+
+    if not cliente_encontrado:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cliente no encontrado"
+        )
+
+    datos_factura_diccionario = datos_factura.model_dump()
+    datos_factura_diccionario["cliente_id"] = cliente_id
+
+    factura_nueva = Factura.model_validate(datos_factura_diccionario)
+
+    sesion.add(factura_nueva)
+    sesion.commit()
+    sesion.refresh(factura_nueva)
+
+    return factura_nueva
 
 
-@rutas_facturas.delete("/facturas/{id}")
-def eliminar_factura(id: int, session: Session = Depends(get_session)):
-    factura = session.get(Factura, id)
-    if not factura:
-        raise HTTPException(status_code=404, detail="Factura no encontrada")
-    session.delete(factura)
-    session.commit()
-    return {"mensaje": "Factura eliminada"}
+@enrutador_facturas.patch("/facturas/{factura_id}", response_model=FacturaLeer)
+async def actualizar_factura(
+    factura_id: int,
+    datos_factura: ActualizarFactura,
+    sesion: Sesion_dependencia
+):
+    factura_bd = sesion.get(Factura, factura_id)
+
+    if not factura_bd:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe la factura"
+        )
+
+    datos_actualizados = datos_factura.model_dump(exclude_unset=True)
+
+    factura_bd.sqlmodel_update(datos_actualizados)
+
+    sesion.add(factura_bd)
+    sesion.commit()
+    sesion.refresh(factura_bd)
+
+    return factura_bd
+
+
+@enrutador_facturas.delete("/facturas/{factura_id}", response_model=FacturaLeer)
+async def eliminar_factura(factura_id: int, sesion: Sesion_dependencia):
+    factura_bd = sesion.get(Factura, factura_id)
+
+    if not factura_bd:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe la factura"
+        )
+
+    sesion.delete(factura_bd)
+    sesion.commit()
+
+    return factura_bd

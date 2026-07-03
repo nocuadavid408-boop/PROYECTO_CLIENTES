@@ -1,53 +1,80 @@
-# rutas o endpoints
-from fastapi import APIRouter, HTTPException, Depends
-from sqlmodel import Session, select
+from fastapi import APIRouter, HTTPException, status
+from sqlmodel import select
+from ..database import Sesion_dependencia
+from ..models.cliente import Cliente, ClienteCrear, ClienteActualizar
 
-from app.models.clientes import Cliente, ClienteCrear
-from app.conexion_bd import get_session
-
-rutas_clientes = APIRouter(tags=["Clientes"])
+enrutador_clientes = APIRouter()
 
 
-@rutas_clientes.get("/clientes")
-def listar_clientes(session: Session = Depends(get_session)):
-    return session.exec(select(Cliente)).all()
+@enrutador_clientes.get("/clientes", response_model=list[Cliente])
+async def listar_clientes(sesion: Sesion_dependencia):
+    clientes = sesion.exec(select(Cliente)).all()
+    return clientes
 
 
-@rutas_clientes.get("/clientes/{id}")
-def obtener_cliente(id: int, session: Session = Depends(get_session)):
-    cliente = session.get(Cliente, id)
-    if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
-    return cliente
+@enrutador_clientes.get(
+    "/clientes/{cliente_id}",
+    response_model=Cliente
+)
+async def listar_cliente(cliente_id: int, sesion: Sesion_dependencia):
+    cliente_bd = sesion.get(Cliente, cliente_id)
+
+    if not cliente_bd:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe el cliente"
+        )
+
+    return cliente_bd
 
 
-@rutas_clientes.post("/clientes")
-def crear_cliente(datos: ClienteCrear, session: Session = Depends(get_session)):
-    cliente = Cliente(**datos.model_dump())
-    session.add(cliente)
-    session.commit()
-    session.refresh(cliente)
-    return {"mensaje": "Cliente creado correctamente", "cliente": cliente}
+@enrutador_clientes.post("/cliente/{cliente_id}", response_model=Cliente)
+async def crear_cliente(datos_cliente: ClienteCrear, sesion: Sesion_dependencia):
+    cliente_nuevo = Cliente.model_validate(datos_cliente.model_dump())
+
+    sesion.add(cliente_nuevo)
+    sesion.commit()
+    sesion.refresh(cliente_nuevo)
+
+    return cliente_nuevo
 
 
-@rutas_clientes.put("/clientes/{id}")
-def editar_cliente(id: int, datos: ClienteCrear, session: Session = Depends(get_session)):
-    cliente = session.get(Cliente, id)
-    if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
-    cliente.nombre = datos.nombre
-    cliente.edad = datos.edad
-    cliente.descripcion = datos.descripcion
-    session.commit()
-    session.refresh(cliente)
-    return {"mensaje": "Cliente actualizado", "cliente": cliente}
+@enrutador_clientes.patch("/cliente/{cliente_id}", response_model=Cliente)
+async def actualizar_cliente(
+    cliente_id: int,
+    datos_cliente: ClienteActualizar,
+    sesion: Sesion_dependencia
+):
+    cliente_bd = sesion.get(Cliente, cliente_id)
+
+    if not cliente_bd:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe el cliente"
+        )
+
+    datos_actualizados = datos_cliente.model_dump(exclude_unset=True)
+
+    cliente_bd.sqlmodel_update(datos_actualizados)
+
+    sesion.add(cliente_bd)
+    sesion.commit()
+    sesion.refresh(cliente_bd)
+
+    return cliente_bd
 
 
-@rutas_clientes.delete("/clientes/{id}")
-def eliminar_cliente(id: int, session: Session = Depends(get_session)):
-    cliente = session.get(Cliente, id)
-    if not cliente:
-        raise HTTPException(status_code=404, detail="Cliente no encontrado")
-    session.delete(cliente)
-    session.commit()
-    return {"mensaje": "Cliente eliminado"}
+@enrutador_clientes.delete("/cliente/{cliente_id}", response_model=Cliente)
+async def eliminar_cliente(cliente_id: int, sesion: Sesion_dependencia):
+    cliente_bd = sesion.get(Cliente, cliente_id)
+
+    if not cliente_bd:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe el cliente"
+        )
+
+    sesion.delete(cliente_bd)
+    sesion.commit()
+
+    return cliente_bd

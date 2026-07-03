@@ -1,59 +1,105 @@
-# rutas o endpoints
-from fastapi import APIRouter, HTTPException, Depends
-from sqlmodel import Session, select
+from fastapi import APIRouter, HTTPException, status
+from sqlmodel import select
+from ..models.transacciones import (
+    Transaccion,
+    CrearTransaccion,
+    TransaccionLeer,
+    ActualizarTransaccion
+)
+from ..models.facturas import Factura
+from ..database import Sesion_dependencia
 
-from app.models.facturas import Transaccion, TransaccionCrear, Factura
-from app.conexion_bd import get_session
-
-rutas_transacciones = APIRouter(tags=["Transacciones"])
-
-
-@rutas_transacciones.get("/transacciones")
-def listar_transacciones(session: Session = Depends(get_session)):
-    return session.exec(select(Transaccion)).all()
-
-
-@rutas_transacciones.get("/transacciones/{id}")
-def obtener_transaccion(id: int, session: Session = Depends(get_session)):
-    transaccion = session.get(Transaccion, id)
-    if not transaccion:
-        raise HTTPException(status_code=404, detail="Transacción no encontrada")
-    return transaccion
+enrutador_transacciones = APIRouter()
 
 
-@rutas_transacciones.post("/transacciones")
-def crear_transaccion(datos: TransaccionCrear, session: Session = Depends(get_session)):
-    factura = session.get(Factura, datos.factura_id)
-    if not factura:
-        raise HTTPException(status_code=404, detail=f"No existe una factura con id {datos.factura_id}")
-    transaccion = Transaccion(**datos.model_dump())
-    session.add(transaccion)
-    session.commit()
-    session.refresh(transaccion)
-    return {"mensaje": "Transacción creada", "transaccion": transaccion}
+@enrutador_transacciones.get("/transacciones", response_model=list[Transaccion])
+async def listar_transacciones(sesion: Sesion_dependencia):
+    consulta = select(Transaccion)
+    resultado = sesion.exec(consulta).all()
+    return resultado
 
 
-@rutas_transacciones.put("/transacciones/{id}")
-def editar_transaccion(id: int, datos: TransaccionCrear, session: Session = Depends(get_session)):
-    factura = session.get(Factura, datos.factura_id)
-    if not factura:
-        raise HTTPException(status_code=404, detail=f"No existe una factura con id {datos.factura_id}")
-    transaccion = session.get(Transaccion, id)
-    if not transaccion:
-        raise HTTPException(status_code=404, detail="Transacción no encontrada")
-    transaccion.valor_unitario = datos.valor_unitario
-    transaccion.cantidad = datos.cantidad
-    transaccion.factura_id = datos.factura_id
-    session.commit()
-    session.refresh(transaccion)
-    return {"mensaje": "Transacción actualizada", "transaccion": transaccion}
+@enrutador_transacciones.post("/transacciones/{factura_id}", response_model=Transaccion)
+async def crear_transaccion(
+    factura_id: int,
+    datos_transaccion: CrearTransaccion,
+    sesion: Sesion_dependencia
+):
+    factura_encontrada = sesion.get(Factura, factura_id)
+
+    if not factura_encontrada:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Factura no encontrada"
+        )
+
+    datos_transaccion_diccionario = datos_transaccion.model_dump()
+    datos_transaccion_diccionario["factura_id"] = factura_id
+
+    transaccion_nueva = Transaccion.model_validate(datos_transaccion_diccionario)
+
+    sesion.add(transaccion_nueva)
+    sesion.commit()
+    sesion.refresh(transaccion_nueva)
+
+    return transaccion_nueva
 
 
-@rutas_transacciones.delete("/transacciones/{id}")
-def eliminar_transaccion(id: int, session: Session = Depends(get_session)):
-    transaccion = session.get(Transaccion, id)
-    if not transaccion:
-        raise HTTPException(status_code=404, detail="Transacción no encontrada")
-    session.delete(transaccion)
-    session.commit()
-    return {"mensaje": "Transacción eliminada"}
+@enrutador_transacciones.get("/transacciones/{transaccion_id}", response_model=TransaccionLeer)
+async def obtener_transaccion(
+    transaccion_id: int,
+    sesion: Sesion_dependencia
+):
+    transaccion_bd = sesion.get(Transaccion, transaccion_id)
+
+    if not transaccion_bd:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe la transacción"
+        )
+
+    return transaccion_bd
+
+
+@enrutador_transacciones.patch("/transacciones/{transaccion_id}", response_model=TransaccionLeer)
+async def actualizar_transaccion(
+    transaccion_id: int,
+    datos_transaccion: ActualizarTransaccion,
+    sesion: Sesion_dependencia
+):
+    transaccion_bd = sesion.get(Transaccion, transaccion_id)
+
+    if not transaccion_bd:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe la transacción"
+        )
+
+    datos_actualizados = datos_transaccion.model_dump(exclude_unset=True)
+
+    transaccion_bd.sqlmodel_update(datos_actualizados)
+
+    sesion.add(transaccion_bd)
+    sesion.commit()
+    sesion.refresh(transaccion_bd)
+
+    return transaccion_bd
+
+
+@enrutador_transacciones.delete("/transacciones/{transaccion_id}", response_model=TransaccionLeer)
+async def eliminar_transaccion(
+    transaccion_id: int,
+    sesion: Sesion_dependencia
+):
+    transaccion_bd = sesion.get(Transaccion, transaccion_id)
+
+    if not transaccion_bd:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No existe la transacción"
+        )
+
+    sesion.delete(transaccion_bd)
+    sesion.commit()
+
+    return transaccion_bd

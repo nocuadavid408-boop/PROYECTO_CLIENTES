@@ -1,3 +1,7 @@
-fastapi
+fastapi[standard]
 uvicorn
 sqlmodel
+pydantic
+
+# Instalar dependencias:
+# uv pip install -r requirements.txt
