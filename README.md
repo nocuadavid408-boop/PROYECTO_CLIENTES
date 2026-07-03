@@ -52,7 +52,7 @@ cd PROYECTO_CLIENTES
 ### 2. Crear el entorno virtual con uv
 
 ```bash
-uv venv
+python -m venv .venv    
 ```
 
 ### 3. Activar el entorno virtual
