@@ -192,4 +192,4 @@ git checkout main              # Volver al ultimo commit
 
 Joshua David Nocua Carrillo
 Tecnologo en Analisis y Desarrollo de Software (ADSO)
-SENA - Ficha 3407184
+SENA  Ficha 3407184
